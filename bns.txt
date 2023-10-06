@@ -1,0 +1,338 @@
+pr 4(A)
+find({Customer:{$regrex:'^a'}})
+find({email:{$regrex:'.in$'}})
+find({OrderItems.ItemName:{$regrex:'/^p.*r$/'}})
+find({paymentmode:{$regrex:'/cash/i'}})		case insensitive
+find({Customer:{$regrex:'/^ab/',$options:'m'}})			
+find({Customer:{$regrex:'/a.*c/',$option:'si'}})	dot character
+find({Customer:{$regrex:'/ab c/,$option:'x'}})		white spaces
+find().sort({field:0 or 1 or -1})
+find().limit(2)
+find().skip(2)
+find().sort({_id:-1})			fetch last 2 document
+			--------------------------------------------------------
+pr4(B)
+aggregate([{ $match:{emp_gender:'female'}])
+
+aggregate([{$group:{_id:'$emp_department'}}])
+
+db.employees.aggregate([{$group:{_id:"$department",totalEmployee:{$sum:1}}}])
+
+db.employees.aggregate([{$match:{gender:'male'}},{$group:{_id:"$department",totalEmployees:{$sum:1}}}])
+
+db.employees.aggregate([{$match:{gender:'male'}},{$group:{_id:"$department",totalSalary:{$sum:'$salary'}}}])
+
+db.employees.aggregate([{$group:{_id:"$emp_id",totalEmployees:{$sum:1}}}])
+
+db.employees.aggregate([{$group:{_id:"$department",Maxsalary:{$max:"$salary"}}}])
+db.employees.aggregate([{$group:{_id:"$department",Minsalary:{$min:"$salary"}}}])
+db.employees.aggregate([{$group:{_id:"$department",Avgsalary:{$avg:"$salary"}}}])
+
+------------
+
+pr5 json
+mongoimport --db dbname --collection collectionname --file filepath\file.json
+
+find({'address.street':{$exists:true}})
+find({'address.coord':{$type:1}})
+find({'grades.score':{$mod:[7,0]}, { }  })
+^mad  /*mon.*/
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+pr6 indexes
+.explain('executionStats')
+db.collectionname.createIndex({"field":1},{'unique':true})
+db.collection.createIndex({'field1':1/-1,'field':1/-1})
+db.collection.getIndexes()    dropIndex("index name")
+db.peaks.createIndex({description:'text'})       find({$text:{$search:"earth's"}})
+db.peaks.find({$text:{$search:"\"Earth's\""}})
+db.peaks.find({$text:{$search:"Needed -notNeeded"}})
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+pr 7 java
+insertdata
+--------
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.MongoClient;
+import org.bson.Document;
+
+
+public class insert_by_java{
+
+    public static void main(String args[]){
+        try{
+        MongoClient mongo = new MongoCLient("localhost",27017);
+        System.out.println("Connected succesfully");
+
+        MongoDatabase db = mongo.getDatabase("practicals");
+        MongoCollection<Document> collection = db.getCollection("Tycs");
+
+        Document doc =  new Document();
+        doc.append("Id",1);
+        doc.append("Rollno",238625);
+        doc.append("Age",19);
+        doc.append("College","Mulund college of commerce");
+
+        collection.insertOne(doc);
+        System.out.println("Inserted Successfully");   
+        }
+        catch(Exception ex){
+            System.out.println(ex);
+        }
+        
+    }
+}
+-------
+retrieve data
+-------
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.FindIterable;
+import com.mongodb.MongoCLient;
+import org.bson.Document;
+import java.util.Iterator;
+
+public class retrieve_by_java{
+    public static void main(String[] args){
+        MongoClient mongo = new MongoClient("localhost",27017);
+        System.out.println("Connected succesfully");
+
+        MongoDatabase db = mongo.getDatabase("practicals");
+        MongoCollection<Document> collection = db.getCollection("orders");
+
+        Document doc = new Document();
+        FindIterable<Document> iterdoc = collection.find();
+
+        Iterator it = iterdoc.iterator();
+        while(it.hasNext()){
+            System.out.println(it.next());
+        }
+        mongo.db();
+
+    }
+}
+-------
+update data
+------------
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.MongoClient;
+import org.bson.Document;
+
+public class update_by_java{
+    public static void main(String args[]){
+
+        MongoClient mongo = new MongoCLient("localhost",27017);
+        System.out.println("Connected succesfully");
+
+        MongoDatabase db = mongo.getDatabase("practicals");
+        MongoCollection<Document> collection = db.getCollection("Tycs");
+
+        Document filter = new Document("order_id",1);
+        
+        Document updatedDoc = new Document("$set",new Document("cost",9000));
+
+        collection.updateOne(filter,updatedDoc);
+        System.out.println("Updated !!");
+
+        mongo.close();
+    }
+}
+-------
+delete data by java
+------
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.MongoClient;
+import org.bson.Document;
+import com.mongodb.client.model.*;
+
+public class delete_by_java{
+    public static void main(String [] args){
+
+        MongoClient mongo = new MongoClient("localhost",27017);
+        System.out.println("Connected SUccesfully");
+
+        MongoDatabase db = mongo.getDatabase("practicals");
+        MongoCollection<Document> collection = mongo.getCollection("orders");
+
+        Document deleteDoc = new Document("order_id",1);
+        collection.deleteOne(deleteDoc);
+        System.out.println("Deleted Succesfully");
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------
+pr 8 php   insert
+
+<?php
+
+$mongo = new MongoClient();
+echo'Connection Succcesful';
+
+
+$db = $mongo->practical;
+echo'Database practical selected';
+
+$collection = $db -> orders;
+echo'Collection orders selected';
+
+$doc = array(
+    'order_id'=>1,
+    'product_name'=>"Pencil",
+    'quantity'=>30,
+    'cost'=>400,
+);
+$collection->insert($doc);
+echo"Document inserted successfully";
+?>
+------- retrieve
+<?php
+$mongo = new MongoClient();
+echo'Connection succesful'
+
+$db= $mongo->practical;
+echo'Database practical selected';
+
+$collection = $db->orders;
+echo'Collection orders selected';
+
+$cursor = $collection->find();
+foreach($cursor as $doc){
+echo '<br>'.$doc['order_id'].'<br>';
+echo '<br>'.$doc['product_name'].'<br>';
+echo '<br>'.$doc['quantity'].'<br>';
+echo '<br>'.$doc['cost'].'<br>';
+} ?>
+------------ update
+<?php
+
+$mongo = new MongoClient();
+echo'Connection Succcesful';
+
+
+$db = $mongo->practical;
+echo'Database practical selected';
+
+$collection = $db -> orders;
+echo'Collection orders selected';
+
+$filter = array('order_id'=>1,);
+$updated = array(
+    '$set'=>array(
+	'cost'=>500
+));
+$collection->update($filter,$updated);
+echo"Document updated successfully";
+
+$cursor = $collection->find();
+foreach($cursor as $doc){
+echo '<br>'.$doc['order_id'].'<br>';
+echo '<br>'.$doc['product_name'].'<br>';
+echo '<br>'.$doc['quantity'].'<br>';
+echo '<br>'.$doc['cost'].'<br>';
+} ?>
+
+-----------delete
+$mongo = new MongoClient();
+echo'Connection Succcesful';
+
+$db = $mongo->practical;
+echo'Database practical selected';
+
+$collection = $db -> orders;
+echo'Collection orders selected';
+
+$collection->remove(array('order_id'=>1));
+echo"Document removed successfully";
+
+$cursor = $collection->find();
+foreach($cursor as $doc){
+echo '<br>'.$doc['order_id'].'<br>';
+echo '<br>'.$doc['product_name'].'<br>';
+echo '<br>'.$doc['quantity'].'<br>';
+echo '<br>'.$doc['cost'].'<br>';
+} ?>
+
+--------------------------------------------------------------------------------------------------------------
+pr9 python
+
+-----------insert.py
+from pymongo import MongoClient
+client = MongoClient('localhost',27017)
+db = client.practical
+
+def insert():
+    try:
+        empID=input('Enter the ID : ')
+        empName=input('Enter the Name :')
+        empAge=input('Enter the Age : ')
+        empCountry=input('Enter the Country : ')
+
+        db.employees.insert_one(
+                {
+                    "_id":empID,
+                    "name":empName,
+                    "age":empAge,
+                    "country":empCountry
+                }
+            )
+        print("\nInsert the Data Successfully\n")
+    except Exception:
+        print(str(e))
+insert()
+
+----------retrieve
+from pymongo import MongoClient
+client=MongoClient('localhost',27017)
+db=client.practical
+collection=db.employees
+documents = collection.find()
+for doc in documents:
+	print(doc)
+
+---------update
+from pymongo import MongoClient
+client = MongoClient('localhost',27017)
+db = client.practical
+
+def update():
+    try:
+        name=input('Enter the Name :')
+        age=input('Enter the Updated Age : ')
+
+        db.employees.update_one(
+             { "name":name},{"$set":{"age":age}}
+            )
+        print("\n Data updated Successfully\n")
+    except Exception:
+        print(str(e))
+update()
+
+---------delete
+
+from pymongo import MongoClient
+client = MongoClient('localhost',27017)
+db = client.practical
+
+def delete():
+    try:
+        Id=input('Enter the Id :')
+
+        db.employees.delete_one(
+             { "_id":Id}
+            )
+        print("\n Data Deleted Successfully\n")
+    except Exception:
+        print(str(e))
+delete()
+
+---------------------------------------------------------------------------------------------------------------
+
+pr 10 
+
+backup -> mongodump
+to restore -> mongorestore
+mongodump --db dbname
+mongorestore --db dbname 
